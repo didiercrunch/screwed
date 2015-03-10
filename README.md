@@ -1,6 +1,6 @@
 ## The questions I screwed
 
-Questions (and their answers) I screwed up during interviews[^1].
+Questions (and their answers) I screwed up during interviews.
 
 
 

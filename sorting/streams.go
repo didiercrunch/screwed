@@ -1,9 +1,5 @@
 package sorting
 
-import "fmt"
-
-var _ = fmt.Print
-
 type IsGreaterer interface {
 	// return true iff "this" is strictly greater than e
 	IsGreater(e IsGreaterer) bool
@@ -77,23 +73,34 @@ func prependValueToEachStream(streams []Stream, values []IsGreaterer) []Stream {
 	return ret
 }
 
+func getSmallestElement(arr []IsGreaterer) (IsGreaterer, int) {
+	smallest, idx := arr[0], 0
+	for i, elm := range arr {
+		if smallest.IsGreater(elm) {
+			smallest = elm
+			idx = i
+		}
+	}
+	return smallest, idx
+}
+
+func getSecondSmallestElement(arr []IsGreaterer) (IsGreaterer, int) {
+	_, smallerIdx := getSmallestElement(arr)
+	secondSmallest, idx := getSmallestElement(append(arr[0:smallerIdx], arr[smallerIdx+1:len(arr)]...))
+	if idx > smallerIdx {
+		idx++
+	}
+	return secondSmallest, idx
+}
+
 func getSmallerStreamWithSecondSmallestElementWithAllTheOthersGreaterStreams(streams []Stream) (Stream, IsGreaterer, []Stream) {
 	firstElements := readFirstElementOfAllTheStreams(streams)
 	streams = prependValueToEachStream(streams, firstElements)
 
-	var smallestStreamIndex int = -1
-	var smallestItem IsGreaterer = &alwaysBigger{}
-	var secondSmallestItem IsGreaterer = &alwaysBigger{}
+	_, smallestStreamIndex := getSmallestElement(firstElements)
+	secondSmallestItem, _ := getSecondSmallestElement(firstElements)
 
-	for i, e := range firstElements {
-		if smallestItem.IsGreater(e) {
-			smallestItem = e
-			smallestStreamIndex = i
-		} else if secondSmallestItem.IsGreater(e) {
-			secondSmallestItem = e
-		}
-	}
-	if _, ok := secondSmallestItem.(*alwaysBigger); ok {
+	if secondSmallestItem == nil {
 		return streams[smallestStreamIndex], nil, []Stream{}
 	}
 	return streams[smallestStreamIndex], secondSmallestItem, allStreamsButOne(streams, smallestStreamIndex)

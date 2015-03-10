@@ -74,6 +74,34 @@ func TestAllStreamsButOne(t *testing.T) {
 	}
 }
 
+func TestGetSmallestElement(t *testing.T) {
+	e, i := getSmallestElement([]IsGreaterer{MockIsGreaterer(9), MockIsGreaterer(10), MockIsGreaterer(1)})
+	if i != 2 {
+		t.Error("bad index")
+	}
+	if e != MockIsGreaterer(1) {
+		t.Error("bad value")
+	}
+}
+
+func TestGetSecondSmallestElement(t *testing.T) {
+	e, i := getSecondSmallestElement([]IsGreaterer{MockIsGreaterer(9), MockIsGreaterer(10), MockIsGreaterer(1)})
+	if i != 0 {
+		t.Error("bad index")
+	}
+	if e != MockIsGreaterer(9) {
+		t.Error("bad value")
+	}
+
+	e, i = getSecondSmallestElement([]IsGreaterer{MockIsGreaterer(0), MockIsGreaterer(10), MockIsGreaterer(1)})
+	if i != 2 {
+		t.Error("bad index")
+	}
+	if e != MockIsGreaterer(1) {
+		t.Error("bad value")
+	}
+}
+
 func TestGetSmallerStreamWithSecondSmallestElementWithAllTheOthersGreaterStreams(t *testing.T) {
 	streams := []Stream{CreateStream(0, 1), CreateStream(3, 4), CreateStream(7, 8)}
 	stream, e, streams := getSmallerStreamWithSecondSmallestElementWithAllTheOthersGreaterStreams(streams)
@@ -121,19 +149,11 @@ func TestSortStreams(t *testing.T) {
 		t.Error()
 	}
 
-	if s := SortStreams(CreateStream(), CreateStream(2, 7)); !streamEqual(s, 2, 7) {
-		t.Error()
-	}
-
-	if s := SortStreams(CreateStream(), CreateStream(2, 7), CreateStream(3, 8)); !streamEqual(s, 2, 3, 7, 8) {
-		t.Error()
-	}
-
 	if s := SortStreams(CreateStream()); !streamEqual(s) {
 		t.Error()
 	}
 
-	if s := SortStreams(CreateStream(1, 2), CreateStream(2, 3)); !streamEqual(s, 1, 2, 2, 3) {
+	if s := SortStreams(CreateStream(1, 4), CreateStream(0, 5)); !streamEqual(s, 0, 1, 4, 5) {
 		t.Error()
 	}
 

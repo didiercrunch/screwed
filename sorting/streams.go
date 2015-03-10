@@ -5,12 +5,6 @@ type IsGreaterer interface {
 	IsGreater(e IsGreaterer) bool
 }
 
-type alwaysBigger struct{}
-
-func (a *alwaysBigger) IsGreater(e IsGreaterer) bool {
-	return e != nil
-}
-
 type Stream chan IsGreaterer
 
 type streamOutput struct {
@@ -76,7 +70,11 @@ func prependValueToEachStream(streams []Stream, values []IsGreaterer) []Stream {
 func getSmallestElement(arr []IsGreaterer) (IsGreaterer, int) {
 	smallest, idx := arr[0], 0
 	for i, elm := range arr {
-		if smallest.IsGreater(elm) {
+		if smallest == nil {
+			smallest = elm
+			idx = i
+		}
+		if elm != nil && smallest.IsGreater(elm) {
 			smallest = elm
 			idx = i
 		}
@@ -100,26 +98,27 @@ func getSmallerStreamWithSecondSmallestElementWithAllTheOthersGreaterStreams(str
 	_, smallestStreamIndex := getSmallestElement(firstElements)
 	secondSmallestItem, _ := getSecondSmallestElement(firstElements)
 
-	if secondSmallestItem == nil {
-		return streams[smallestStreamIndex], nil, []Stream{}
-	}
 	return streams[smallestStreamIndex], secondSmallestItem, allStreamsButOne(streams, smallestStreamIndex)
+}
+
+func outputToStream(input, output Stream) {
+	for e := range input {
+		output <- e
+	}
+	close(output)
 }
 
 func sortStreamInChannel(o Stream, streams []Stream) {
 	if len(streams) == 1 {
-		for e := range streams[0] {
-			o <- e
-		}
-		close(o)
+		outputToStream(streams[0], o)
 		return
 	}
 	smallestStream, secondSmallestItem, greaterStreams := getSmallerStreamWithSecondSmallestElementWithAllTheOthersGreaterStreams(streams)
 	if secondSmallestItem == nil {
-		sortStreamInChannel(o, append(greaterStreams, smallestStream))
+		sortStreamInChannel(o, []Stream{smallestStream})
 		return
-
 	}
+
 	for elm := range smallestStream {
 		if !elm.IsGreater(secondSmallestItem) {
 			o <- elm

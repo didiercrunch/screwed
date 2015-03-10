@@ -153,7 +153,22 @@ func TestSortStreams(t *testing.T) {
 		t.Error()
 	}
 
+	if s := SortStreams(CreateStream()); !streamEqual(s) {
+		t.Error()
+	}
+
 	if s := SortStreams(CreateStream(1, 4), CreateStream(0, 5)); !streamEqual(s, 0, 1, 4, 5) {
+		t.Error()
+	}
+
+	if s := SortStreams(CreateStream(1, 2), CreateStream(3, 4), CreateStream(5, 6)); !streamEqual(s, 1, 2, 3, 4, 5, 6) {
+		t.Error()
+	}
+
+	if s := SortStreams(CreateStream(1, 2), CreateStream()); !streamEqual(s, 1, 2) {
+		t.Error()
+	}
+	if s := SortStreams(CreateStream(), CreateStream(1, 2)); !streamEqual(s, 1, 2) {
 		t.Error()
 	}
 
